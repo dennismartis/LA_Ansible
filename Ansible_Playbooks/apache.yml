@@ -1,0 +1,55 @@
+---
+- hosts: centos
+  become: yes
+  tasks:
+    - name: Install Apache
+      yum:
+        name: httpd
+        state: latest
+    - name: Start and enable Apache
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+    - name: Set Apache to listen to port 8080
+      lineinfile:
+        path: /etc/httpd/conf/httpd.conf
+        regexp: '^Listen '
+        insertafter: '^#Listen '
+        line: 'Listen 0.0.0.0:8080'
+      notify:
+      - restart webserver
+    - name: Copy archive to server
+      copy:
+        src: /home/dennis/Documents/LA_Ansible/website.tgz
+        dest: /tmp/
+    - name: Unarchive website
+      unarchive:
+        src: /tmp/website.tgz
+        dest: /var/www/html
+        remote_src: yes
+    - name: Enable http in firewall settings
+      firewalld:
+        service: http
+        permanent: true
+        state: enabled
+      notify:
+      - restart firewall
+    - name: Enable tcp port 8080 in firewall settings
+      firewalld:
+        port: 8080/tcp
+        permanent: true
+        state: enabled
+      notify:
+      - restart firewall
+  handlers:
+    - name: Restart Apache
+      service:
+        name: httpd
+        state: restarted
+      listen: "restart webserver"
+    - name: Restart Firewall
+      service:
+        name: firewalld
+        state: restarted
+      listen: "restart firewall"
