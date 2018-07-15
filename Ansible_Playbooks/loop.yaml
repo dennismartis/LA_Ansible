@@ -1,0 +1,11 @@
+---
+- hosts: vm-01
+  tasks:
+    - name: Create files
+      file:
+        path: "/tmp/{{ item }}"
+        state: touch
+      with_items:
+        - testfile1
+        - testfile2
+        - testfile3

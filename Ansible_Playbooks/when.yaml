@@ -1,0 +1,10 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+    - name: Create testfile
+      file:
+        path: /tmp/testfile4
+        state: touch
+      when:
+        - ansible_hostname == "vm-01"
