@@ -1,0 +1,5 @@
+---
+- hosts: vm-02
+  become: yes
+  roles:
+    - apache

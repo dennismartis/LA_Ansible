@@ -1,0 +1,42 @@
+---
+# tasks file for apache
+- name: Install Apache
+  yum:
+    name: httpd
+    state: installed
+- name: Start and enable Apache
+  service:
+    name: httpd
+    state: started
+    enabled: yes
+- name: Set Apache config to listen to port 8080
+  lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    regexp: '^Listen '
+    insertafter: '^#Listen '
+    line: 'Listen 0.0.0.0:8080'
+  notify:
+  - restart webserver
+- name: Copy website contents archive file to server
+  copy:
+    src: website.tgz
+    dest: /tmp/
+- name: Unarchive website
+  unarchive:
+    src: /tmp/website.tgz
+    dest: /var/www/html
+    remote_src: yes
+- name: Enable http in firewall config
+  firewalld:
+    service: http
+    permanent: true
+    state: enabled
+  notify:
+  - restart firewall
+- name: Enable tcp port 8080 in firewall config
+  firewalld:
+    port: 8080/tcp
+    permanent: true
+    state: enabled
+  notify:
+  - restart firewall
