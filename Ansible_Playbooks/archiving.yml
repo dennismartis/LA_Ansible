@@ -1,0 +1,16 @@
+---
+- hosts: web01
+  become: yes
+  tasks:
+    - name: Find files to archive
+      find:
+        path: /home/dennis
+        patterns: "den_*"
+        excludes: "*.gz"
+      register: found
+    - debug:
+        msg: "{{ item.path }}"
+      loop: "{{ found.files }}"
+    - archive:
+        path: "{{ item.path }}"
+      loop: "{{ found.files }}"
