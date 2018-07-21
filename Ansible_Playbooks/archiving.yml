@@ -26,7 +26,6 @@
         dest: /home/dennis/backup/{{ item.path.split("/")[-1] }}.{{ lookup('pipe','date +%Y-%m-%d-%H-%M-%S') }}.gz
       loop: "{{ found.files }}"
       register: arch
-    - debug: msg="{{ arch.results }}"
     - name: copy
       copy:
         src: "{{ item.dest }}"
