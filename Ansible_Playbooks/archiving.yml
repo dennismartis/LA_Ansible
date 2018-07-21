@@ -11,6 +11,32 @@
     - debug:
         msg: "{{ item.path }}"
       loop: "{{ found.files }}"
-    - archive:
+    - name: Check backup directory
+      file:
+        path: /home/dennis/backup
+        state: directory
+        owner: dennis
+        group: dennis
+    - name: Archiving files
+      archive:
         path: "{{ item.path }}"
+        owner: dennis
+        group: dennis
+        remove: yes
+        dest: /home/dennis/backup/{{ item.path.split("/")[-1] }}.{{ lookup('pipe','date +%Y-%m-%d-%H-%M-%S') }}.gz
+      loop: "{{ found.files }}"
+      register: arch
+    - debug: msg="{{ arch.results }}"
+    - name: copy
+      copy:
+        src: "{{ item.dest }}"
+        dest: /home/dennis/backup
+        remote_src: yes
+        owner: dennis
+        group: dennis
+      loop: "{{ arch.results }}"
+    - name: delete files
+      file:
+        path: "{{ item.path }}"
+        state: absent
       loop: "{{ found.files }}"
